@@ -16,7 +16,8 @@ app.post("/convert", upload.single("video"), (req, res) => {
 
   ffmpeg(inputPath)
     .outputOptions([
-      "-vf scale=720:1280,setsar=1", // Convert to portrait
+      "-vf",
+      "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,setsar=1", 
       "-c:a copy",
     ])
     .save(outputPath)
