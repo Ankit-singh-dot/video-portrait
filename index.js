@@ -9,25 +9,29 @@ const axios = require("axios");
 const app = express();
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
 
+const uploadDir = "/tmp/uploads";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const upload = multer({
   storage: multer.diskStorage({
-    destination: "/app/uploads",
+    destination: uploadDir,
     filename: (req, file, cb) => {
       cb(null, Date.now() + path.extname(file.originalname));
     },
   }),
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
 });
 
 
 app.post("/convert", upload.single("video"), (req, res) => {
   const inputPath = req.file.path;
-  const outputPath = `/app/uploads/output-${Date.now()}.mp4`;
+  const outputPath = path.join(uploadDir, `output-${Date.now()}.mp4`);
 
   ffmpeg(inputPath)
     .videoCodec("libx264")
@@ -57,11 +61,10 @@ app.post("/convert-url", async (req, res) => {
   const { videoUrl } = req.body;
   if (!videoUrl) return res.status(400).send("Missing videoUrl");
 
-  const inputPath = `/app/uploads/input-${Date.now()}.mp4`;
-  const outputPath = `/app/uploads/output-${Date.now()}.mp4`;
+  const inputPath = path.join(uploadDir, `input-${Date.now()}.mp4`);
+  const outputPath = path.join(uploadDir, `output-${Date.now()}.mp4`);
 
   try {
-
     const response = await axios({
       url: videoUrl,
       method: "GET",
