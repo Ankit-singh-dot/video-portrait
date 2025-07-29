@@ -9,11 +9,11 @@ const axios = require("axios");
 const app = express();
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-// Middleware for JSON
+
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
-// Multer Storage
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: "/app/uploads",
@@ -24,7 +24,7 @@ const upload = multer({
   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
 });
 
-// ----------- FILE UPLOAD CONVERT -------------
+
 app.post("/convert", upload.single("video"), (req, res) => {
   const inputPath = req.file.path;
   const outputPath = `/app/uploads/output-${Date.now()}.mp4`;
@@ -52,7 +52,7 @@ app.post("/convert", upload.single("video"), (req, res) => {
     });
 });
 
-// ----------- URL DOWNLOAD + CONVERT -------------
+
 app.post("/convert-url", async (req, res) => {
   const { videoUrl } = req.body;
   if (!videoUrl) return res.status(400).send("Missing videoUrl");
@@ -61,7 +61,7 @@ app.post("/convert-url", async (req, res) => {
   const outputPath = `/app/uploads/output-${Date.now()}.mp4`;
 
   try {
-    // Download video
+
     const response = await axios({
       url: videoUrl,
       method: "GET",
